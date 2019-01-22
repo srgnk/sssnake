@@ -1,8 +1,8 @@
-# Makefile
-LDFLAGS=-lncurses -g
+CCFLAGS=-D _BSD_SOURCE -std=c99 -g
+LDFLAGS=-lncurses
 
 all: sssnake.c
-	$(CC) -o sssnake sssnake.c $(LDFLAGS)
+	$(CC) $(CCFLAGS) -o sssnake sssnake.c $(LDFLAGS)
 
 clean:
 	$(RM) sssnake
