@@ -1,1 +1,1 @@
-# sssnake
+# sssnake - simple stupid snake game
