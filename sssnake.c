@@ -16,17 +16,13 @@ struct snake {
     int len;
 };
 
-struct game {
-    int direction_x, direction_y;
+struct snake_game {
     int food_x, food_y, caught;
-    int x_was_max, y_was_max;
-    int *head_x, *head_y;
     int next_x, next_y;
-    int max_y, max_x;
-    int color, num;
-    int score;
+    int max_x, max_y;
+    int score, color;
 
-    struct snake *snake;
+    struct snake snake;
 };
 
 void snake_exit()
@@ -39,7 +35,7 @@ void snake_exit()
     mvprintw(max_y/2, max_x/2, "Game over!");
     /* mvprintw(max_y/2 + 1, max_x/2, "Your score: %i\n", score); */
     refresh();
-    sleep(3);
+    sleep(1);
     timeout(100000);
     /* c = getch(); */
     endwin();
@@ -141,24 +137,8 @@ void snake_setup_colors()
     init_pair(7, COLOR_WHITE,   COLOR_BLACK);
 }
 
-int main(int argc, char *argv[])
+void snake_init_screen()
 {
-    int color = 1;
-    int food_x = 0, food_y = 0, caught = 1;
-    int max_y = 0, max_x = 0;
-    int next_x = 0, next_y = 0;
-    int direction_x = 1, direction_y = 0;
-    int x_was_max = 0, y_was_max = 0;
-    int score = 0;
-
-    struct snake snake;
-    int *x = &snake.body[0].x;
-    int *y = &snake.body[0].y;
-    int *snake_len = &snake.len;
-
-    /* Setup snake */
-    snake_init(&snake);
-
     initscr();                    /* Initialize the window */
     /* noecho();                  // Don't echo any keypresses */
     /* cbreak();                  // Don't wait for new line */
@@ -168,20 +148,44 @@ int main(int argc, char *argv[])
     cbreak();                     /* take input chars one at a time, no wait for \n */
     echo();                       /* echo input - in color */
     curs_set(FALSE);              /* Don't display a cursor */
+}
+
+void snake_game_init(struct snake_game *game)
+{
+    game->score = 0;
+    /* To make the food appear ?? */
+    game->caught = 1;
+
+    /* Setup snake */
+    snake_init(&game->snake);
+
+    /* Setup ncurses stuff */
+    snake_init_screen();
 
     if (has_colors()) {
         start_color();
         snake_setup_colors();
     }
+}
 
-    /*
-     * 258 KEY_DOWN
-     * 259 KEY_UP
-     * 260 KEY_LEF
-     * 261 KEY_RIGHT
-     */
+/*
+ * 258 KEY_DOWN
+ * 259 KEY_UP
+ * 260 KEY_LEF
+ * 261 KEY_RIGHT
+ */
+void snake_run(struct snake_game *game)
+{
+    int direction_x = 1, direction_y = 0;
+    struct snake *snake = &game->snake;
+    int next_x = 0, next_y = 0;
+    int max_x = 0, max_y = 0;
+    int *head_x = &snake->body[0].x;
+    int *head_y = &snake->body[0].y;
+
     while(1) {
         int c = getch();
+
         switch(c) {
             case KEY_LEFT:
                 /* Check it's not RIGHT, we can't turn the opposite direction */
@@ -218,74 +222,70 @@ int main(int argc, char *argv[])
             break;
 
         /* set the color */
-        if (c != -1 && c != color &&
+        if (c != -1 && c != game->color &&
             c != KEY_LEFT && c != KEY_RIGHT &&
             c != KEY_UP && c != KEY_DOWN)
-            color = c;
-        attrset(COLOR_PAIR(color % 8));
-
-        /* process the command keystroke */
-        (*x == max_x-1) ? (x_was_max = 1) : (x_was_max = 0);
-        (*y == max_y-1) ? (y_was_max = 1) : (y_was_max = 0);
+            game->color = c;
+        attrset(COLOR_PAIR(game->color % 8));
 
         /* Global var `stdscr` is created by the call to `initscr()` */
         getmaxyx(stdscr, max_y, max_x);
-
-        /* Correct the position if window was shrinked */
-        if (*x >= max_x) *x = max_x - 1;
-        if (*y >= max_y) *y = max_y - 1;
-        if (*x < 0) *x = 0;
-        if (*y < 0) *y = 0;
-
-        /* Correct position if window was enlarged */
-        if (x_was_max && *x <= max_x-1) *x = max_x-1;
-        if (y_was_max && *y <= max_y-1) *y = max_y-1;
 
         /* Clear the screen of all */
         clear();
 
         /* print the score */
-        mvprintw(max_y/2 - 3, max_x/2, "Score: %i", score);
+        mvprintw(max_y/2 - 3, max_x/2, "Score: %i", game->score);
 
         /* print the debug information */
-        mvprintw(max_y/2 - 2, max_x/2, "X: %i", *x);
-        mvprintw(max_y/2 - 1, max_x/2, "Y: %i", *y);
+        mvprintw(max_y/2 - 2, max_x/2, "X: %i", *head_x);
+        mvprintw(max_y/2 - 1, max_x/2, "Y: %i", *head_y);
         mvprintw(max_y/2, max_x/2, "dirX: %i", direction_x);
         mvprintw(max_y/2 + 1, max_x/2, "dirY: %i", direction_y);
         mvprintw(max_y/2 + 2, max_x/2, "MaxX: %i", max_x);
         mvprintw(max_y/2 + 3, max_x/2, "MaxY: %i", max_y);
         mvprintw(max_y/2 + 4, max_x/2, "Char: %i", c);
-        mvprintw(max_y/2 + 5, max_x/2, "Len: %i", *snake_len);
+        mvprintw(max_y/2 + 5, max_x/2, "Len: %i", snake->len);
         /* Print food at the current xy position */
-        mvprintw(food_y, food_x, "o");
+        mvprintw(game->food_y, game->food_x, "o");
 
-        snake_print(&snake);
+        snake_print(snake);
         refresh();
 
         /* Shorter delay between movements */
         usleep(SNAKE_DELAY);
 
-        next_x = *x + direction_x;
-        next_y = *y + direction_y;
+        next_x = *head_x + direction_x;
+        next_y = *head_y + direction_y;
 
         /* snake will got the food */
-        if (next_x == food_x && next_y == food_y) {
-            caught = 1;
-            score++;
+        if (next_x == game->food_x && next_y == game->food_y) {
+            game->caught = 1;
+            game->score++;
         }
 
-        snake_move(&snake, caught, direction_x, direction_y);
+        snake_move(snake, game->caught, direction_x, direction_y);
 
         /* Generate a new place for food */
-        if (caught) {
+        if (game->caught) {
             srand(time(NULL));
-            food_x = rand() % max_x;
-            food_y = rand() % max_y;
-            caught = 0;
+            game->food_x = rand() % max_x;
+            game->food_y = rand() % max_y;
+            game->caught = 0;
         }
 
     }
 
     /* Restore normal terminal behavior */
     endwin();
+}
+
+int main(int argc, char *argv[])
+{
+    struct snake_game game;
+
+    snake_game_init(&game);
+    snake_run(&game);
+
+    return 0;
 }
