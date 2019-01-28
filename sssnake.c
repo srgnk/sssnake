@@ -6,6 +6,7 @@
 #define SNAKE_DELAY         50000
 #define SNAKE_GETCH_TIMEOUT 0.1
 #define SNAKE_MAX_LENGTH    100
+#define SNAKE_END_SCORE     10
 
 struct snake_coord {
     int x, y;
@@ -21,6 +22,7 @@ struct snake_game {
     int next_x, next_y;
     int max_x, max_y;
     int score, color;
+    int endscore;
 
     struct snake snake;
 };
@@ -38,6 +40,20 @@ void snake_exit()
     sleep(1);
     timeout(100000);
     /* c = getch(); */
+    endwin();
+    exit(0);
+}
+
+void snake_win()
+{
+    int max_x, max_y;
+
+    getmaxyx(stdscr, max_y, max_x);
+    clear();
+    mvprintw(max_y/2, max_x/2, "You won!");
+    refresh();
+    sleep(1);
+    timeout(100000);
     endwin();
     exit(0);
 }
@@ -152,6 +168,7 @@ void snake_init_screen()
 
 void snake_game_init(struct snake_game *game)
 {
+    game->endscore = SNAKE_END_SCORE;
     game->score = 0;
     /* To make the food appear ?? */
     game->caught = 1;
@@ -273,6 +290,9 @@ void snake_run(struct snake_game *game)
             game->food_y = rand() % max_y;
             game->caught = 0;
         }
+
+        if (game->score >= game->endscore)
+            snake_win();
 
     }
 
