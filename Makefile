@@ -1,4 +1,4 @@
-CCFLAGS=-D _BSD_SOURCE -std=c99 -g
+CCFLAGS=-D _DEFAULT_SOURCE -std=c99 -g
 LDFLAGS=-lncurses
 
 all: sssnake.c
