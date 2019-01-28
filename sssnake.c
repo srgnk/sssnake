@@ -3,7 +3,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define SNAKE_DELAY         50000
+#define SNAKE_DELAY_MAX     100000
+#define SNAKE_DELAY_MIN     40000
 #define SNAKE_GETCH_TIMEOUT 0.1
 #define SNAKE_MAX_LENGTH    100
 #define SNAKE_END_SCORE     10
@@ -19,6 +20,7 @@ struct snake {
 
 struct snake_game {
     int food_x, food_y, caught;
+    int speed_inc, speed;
     int next_x, next_y;
     int max_x, max_y;
     int score, color;
@@ -136,6 +138,17 @@ void snake_print(struct snake *snake)
     mvprintw(snake->body[0].y, snake->body[0].x, "X");
 }
 
+void snake_increase_speed(struct snake_game *game)
+{
+    if (game->speed > SNAKE_DELAY_MIN)
+        game->speed -= game->speed_inc;
+
+    if (game->speed < SNAKE_DELAY_MIN)
+        game->speed = SNAKE_DELAY_MIN;
+
+    return;
+}
+
 void snake_setup_colors()
 {
     /*
@@ -172,6 +185,9 @@ void snake_game_init(struct snake_game *game)
     game->score = 0;
     /* To make the food appear ?? */
     game->caught = 1;
+    game->speed = SNAKE_DELAY_MAX;
+    /* Make the speed increasing up to 3/4 of the game's end score */
+    game->speed_inc = (SNAKE_DELAY_MAX - SNAKE_DELAY_MIN)/(3*game->endscore/4);
 
     /* Setup snake */
     snake_init(&game->snake);
@@ -262,7 +278,8 @@ void snake_run(struct snake_game *game)
         mvprintw(max_y/2 + 2, max_x/2, "MaxX: %i", max_x);
         mvprintw(max_y/2 + 3, max_x/2, "MaxY: %i", max_y);
         mvprintw(max_y/2 + 4, max_x/2, "Char: %i", c);
-        mvprintw(max_y/2 + 5, max_x/2, "Len: %i", snake->len);
+        mvprintw(max_y/2 + 5, max_x/2, "Speed: %i", game->speed);
+        mvprintw(max_y/2 + 6, max_x/2, "SpInc: %i", game->speed_inc);
         /* Print food at the current xy position */
         mvprintw(game->food_y, game->food_x, "o");
 
@@ -270,7 +287,7 @@ void snake_run(struct snake_game *game)
         refresh();
 
         /* Shorter delay between movements */
-        usleep(SNAKE_DELAY);
+        usleep(game->speed);
 
         next_x = *head_x + direction_x;
         next_y = *head_y + direction_y;
@@ -279,6 +296,7 @@ void snake_run(struct snake_game *game)
         if (next_x == game->food_x && next_y == game->food_y) {
             game->caught = 1;
             game->score++;
+            snake_increase_speed(game);
         }
 
         snake_move(snake, game->caught, direction_x, direction_y);
