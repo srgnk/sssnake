@@ -9,6 +9,11 @@
 #define SNAKE_MAX_LENGTH    100
 #define SNAKE_END_SCORE     10
 
+char *snake_menu[] = {
+                        "Play",
+                        "Exit",
+};
+
 struct snake_coord {
     int x, y;
 };
@@ -29,30 +34,13 @@ struct snake_game {
     struct snake snake;
 };
 
-void snake_exit()
-{
-    int max_x, max_y;
-    /* int c; */
-
-    getmaxyx(stdscr, max_y, max_x);
-    clear();
-    mvprintw(max_y/2, max_x/2, "Game over!");
-    /* mvprintw(max_y/2 + 1, max_x/2, "Your score: %i\n", score); */
-    refresh();
-    sleep(1);
-    timeout(100000);
-    /* c = getch(); */
-    endwin();
-    exit(0);
-}
-
-void snake_win()
+void snake_exit(const char *message)
 {
     int max_x, max_y;
 
     getmaxyx(stdscr, max_y, max_x);
     clear();
-    mvprintw(max_y/2, max_x/2, "You won!");
+    mvprintw(max_y/2, max_x/2, message);
     refresh();
     sleep(1);
     timeout(100000);
@@ -120,7 +108,7 @@ void snake_move(struct snake *snake, int enlarge, int direction_x, int direction
     snake->body[0].y += direction_y;
 
     if (snake_collision(snake))
-        snake_exit();
+        snake_exit("Game over!");
 }
 
 
@@ -204,7 +192,7 @@ void snake_game_init(struct snake_game *game)
 /*
  * 258 KEY_DOWN
  * 259 KEY_UP
- * 260 KEY_LEF
+ * 260 KEY_LEFT
  * 261 KEY_RIGHT
  */
 void snake_run(struct snake_game *game)
@@ -310,7 +298,7 @@ void snake_run(struct snake_game *game)
         }
 
         if (game->score >= game->endscore)
-            snake_win();
+            snake_exit("You won!");
 
     }
 
@@ -318,12 +306,71 @@ void snake_run(struct snake_game *game)
     endwin();
 }
 
+void snake_start_menu()
+{
+    int highlight = 0;
+    int max_x, max_y;
+    int choice, i;
+    int enter = 0;
+
+    snake_init_screen();
+
+    getmaxyx(stdscr, max_y, max_x);
+    WINDOW *menuwin = newwin(5, max_x/2 - 10, max_y/2 - 10, 5);
+    box(menuwin, 0, 0);
+    refresh();
+    wrefresh(menuwin);
+
+    keypad(menuwin, true);
+
+    while (1) {
+        highlight %= 2;
+        clear();
+
+        for (i = 0; i < 2; i++) {
+            if (i == highlight)
+                wattron(menuwin, A_REVERSE);
+            mvwprintw(menuwin, i + 1, 1, snake_menu[i]);
+            wattroff(menuwin, A_REVERSE);
+        }
+
+        choice = wgetch(menuwin);
+
+        switch(choice) {
+            case KEY_ENTER:
+            case ' ':
+            case 10:
+                enter = 1;
+                break;
+            case KEY_UP:
+                highlight--;
+                break;
+            case KEY_DOWN:
+                highlight++;
+                break;
+            default:
+                break;
+        }
+
+        if (enter == 1)
+            break;
+    }
+
+    if (highlight == 0) {
+        struct snake_game game;
+
+        snake_game_init(&game);
+        snake_run(&game);
+    } else if (highlight == 1) {
+        snake_exit("Bye!");
+    }
+
+    return;
+}
+
 int main(int argc, char *argv[])
 {
-    struct snake_game game;
-
-    snake_game_init(&game);
-    snake_run(&game);
+    snake_start_menu();
 
     return 0;
 }
