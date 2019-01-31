@@ -308,7 +308,7 @@ void snake_run(struct snake_game *game)
 
 void snake_start_menu()
 {
-    int highlight = 0;
+    unsigned int highlight = 0;
     int max_x, max_y;
     int choice, i;
     int enter = 0;
