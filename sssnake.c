@@ -339,7 +339,10 @@ void snake_start_menu()
         switch(choice) {
             case KEY_ENTER:
             case ' ':
+            /* 10 - Space */
             case 10:
+            /* 13 - Enter */
+            case 13:
                 enter = 1;
                 break;
             case KEY_UP:
