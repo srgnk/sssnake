@@ -316,7 +316,7 @@ void snake_start_menu()
     snake_init_screen();
 
     getmaxyx(stdscr, max_y, max_x);
-    WINDOW *menuwin = newwin(5, max_x/2 - 10, max_y/2 - 10, 5);
+    WINDOW *menuwin = newwin(4, 20, max_y/2 - 2, max_x/2 - 10);
     box(menuwin, 0, 0);
     refresh();
     wrefresh(menuwin);
@@ -358,6 +358,8 @@ void snake_start_menu()
         if (enter == 1)
             break;
     }
+
+    delwin(menuwin);
 
     if (highlight == 0) {
         struct snake_game game;
