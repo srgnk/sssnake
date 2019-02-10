@@ -306,9 +306,9 @@ void snake_run(struct snake_game *game, bool twoplayers)
         clear();
 
         /* print the score */
-        mvprintw(0, 0, "Player1 Score: %i", snake1->score);
+        mvprintw(0, 0, "Player 1 Score: %i", snake1->score);
         if (twoplayers)
-            mvprintw(0, max_x - 18, "Player2 Score: %i", snake2->score);
+            mvprintw(0, max_x - 18, "Player 2 Score: %i", snake2->score);
 
         if (debug_info) {
             /* print the debug information */
