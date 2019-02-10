@@ -164,13 +164,13 @@ void snake_setup_colors()
 void snake_init_screen()
 {
     initscr();                    /* Initialize the window */
-    /* noecho();                  // Don't echo any keypresses */
+    noecho();                     /* Don't echo any keypresses */
     /* cbreak();                  // Don't wait for new line */
     timeout(SNAKE_GETCH_TIMEOUT); /* getch() timeout */
     keypad(stdscr, TRUE);         /* enable keyboard mapping */
     nonl();                       /* tell curses not to do NL->CR/NL on output */
     cbreak();                     /* take input chars one at a time, no wait for \n */
-    echo();                       /* echo input - in color */
+    /* echo();                       /1* echo input - in color *1/ */
     curs_set(FALSE);              /* Don't display a cursor */
 
     if (has_colors()) {
@@ -247,28 +247,28 @@ void snake_run(struct snake_game *game, bool twoplayers)
         if (twoplayers) {
             /* using wasd keys*/
             switch(c) {
-                case 97: /* a - LEFT */
+                case 'a': /* a - LEFT */
                     /* Check it's not RIGHT, we can't turn the opposite direction */
                     if (!(direction2_x == 1 && direction2_y == 0)) {
                         direction2_x = -1;
                         direction2_y = 0;
                     }
                     break;
-                case 100: /* d - RIGHT */
+                case 'd': /* d - RIGHT */
                     /* Check it's not LEFT, we can't turn the opposite direction */
                     if (!(direction2_x == -1 && direction2_y == 0)) {
                         direction2_x = 1;
                         direction2_y = 0;
                     }
                     break;
-                case 119: /* w - UP */
+                case 'w': /* w - UP */
                     /* Check it's not DOWN, we can't turn the opposite direction */
                     if (!(direction2_x == 0 && direction2_y == 1)) {
                         direction2_x = 0;
                         direction2_y = -1;
                     }
                     break;
-                case 115: /* s - DOWN */
+                case 's': /* s - DOWN */
                     /* Check it's not UP, we can't turn the opposite direction */
                     if (!(direction2_x == 0 && direction2_y == -1)) {
                         direction2_x = 0;
@@ -278,12 +278,16 @@ void snake_run(struct snake_game *game, bool twoplayers)
             }
         }
 
-        /* exit game 113 == 'q' */
-        if (c == 113)
+        /* pause */
+        if (c == 'p')
+            while ((c = getch()) != 'p' && c != 'q');
+
+        /* exit game */
+        if (c == 'q')
             break;
 
-        /* 105 == 'i' */
-        if (c == 105)
+        /* debug info */
+        if (c == 'i')
             debug_info ^= 1;
 
         /* set the color */
