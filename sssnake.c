@@ -208,6 +208,7 @@ void snake_run(struct snake_game *game, bool twoplayers)
     int *head1_y = &snake1->body[0].y;
     int *head2_x = &snake2->body[0].x;
     int *head2_y = &snake2->body[0].y;
+    int debug_info = 0;
 
     while(1) {
         int c = getch();
@@ -281,6 +282,10 @@ void snake_run(struct snake_game *game, bool twoplayers)
         if (c == 113)
             break;
 
+        /* 105 == 'i' */
+        if (c == 105)
+            debug_info ^= 1;
+
         /* set the color */
         /*
         if (c != -1 && c != snake1->color &&
@@ -301,16 +306,18 @@ void snake_run(struct snake_game *game, bool twoplayers)
         if (twoplayers)
             mvprintw(max_y/2 - 4, max_x/2, "Player2 Score: %i", snake2->score);
 
-        /* print the debug information */
-        mvprintw(max_y/2 - 2, max_x/2, "X: %i", *head1_x);
-        mvprintw(max_y/2 - 1, max_x/2, "Y: %i", *head1_y);
-        mvprintw(max_y/2, max_x/2, "dirX: %i", direction1_x);
-        mvprintw(max_y/2 + 1, max_x/2, "dirY: %i", direction1_y);
-        mvprintw(max_y/2 + 2, max_x/2, "MaxX: %i", max_x);
-        mvprintw(max_y/2 + 3, max_x/2, "MaxY: %i", max_y);
-        mvprintw(max_y/2 + 4, max_x/2, "Char: %i", c);
-        mvprintw(max_y/2 + 5, max_x/2, "Speed: %i", game->speed);
-        mvprintw(max_y/2 + 6, max_x/2, "SpInc: %i", game->speed_inc);
+        if (debug_info) {
+            /* print the debug information */
+            mvprintw(max_y/2 - 2, max_x/2, "X: %i", *head1_x);
+            mvprintw(max_y/2 - 1, max_x/2, "Y: %i", *head1_y);
+            mvprintw(max_y/2, max_x/2, "dirX: %i", direction1_x);
+            mvprintw(max_y/2 + 1, max_x/2, "dirY: %i", direction1_y);
+            mvprintw(max_y/2 + 2, max_x/2, "MaxX: %i", max_x);
+            mvprintw(max_y/2 + 3, max_x/2, "MaxY: %i", max_y);
+            mvprintw(max_y/2 + 4, max_x/2, "Char: %i", c);
+            mvprintw(max_y/2 + 5, max_x/2, "Speed: %i", game->speed);
+            mvprintw(max_y/2 + 6, max_x/2, "SpInc: %i", game->speed_inc);
+        }
 
         /* Print food at the current xy position */
         mvprintw(game->food_y, game->food_x, "o");
