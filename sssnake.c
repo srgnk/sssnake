@@ -70,7 +70,7 @@ int snake_collision(struct snake *snake)
     return 0;
 }
 
-void snake_init(struct snake *snake)
+void snake_init_snake(struct snake *snake)
 {
     for (int i = 1; i < SNAKE_MAX_LENGTH; i++) {
            snake->body[i].x = -10;
@@ -165,6 +165,11 @@ void snake_init_screen()
     cbreak();                     /* take input chars one at a time, no wait for \n */
     echo();                       /* echo input - in color */
     curs_set(FALSE);              /* Don't display a cursor */
+
+    if (has_colors()) {
+        start_color();
+        snake_setup_colors();
+    }
 }
 
 void snake_game_init(struct snake_game *game)
@@ -178,15 +183,10 @@ void snake_game_init(struct snake_game *game)
     game->speed_inc = (SNAKE_DELAY_MAX - SNAKE_DELAY_MIN)/(3*game->endscore/4);
 
     /* Setup snake */
-    snake_init(&game->snake);
+    snake_init_snake(&game->snake);
 
     /* Setup ncurses stuff */
     snake_init_screen();
-
-    if (has_colors()) {
-        start_color();
-        snake_setup_colors();
-    }
 }
 
 /*
