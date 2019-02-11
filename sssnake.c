@@ -8,6 +8,7 @@
 #define SNAKE_GETCH_TIMEOUT 0.1
 #define SNAKE_MAX_LENGTH    100
 #define SNAKE_END_SCORE     10
+#define SNAKE_MAX_LOGO_LEN  128
 
 char *snake_menu[] = {
                         "One Player",
@@ -389,6 +390,26 @@ void snake_run(struct snake_game *game, bool twoplayers)
     endwin();
 }
 
+int snake_print_logo(int max_x) {
+    char *filename = "sssnake_logo.txt";
+    char read_string[SNAKE_MAX_LOGO_LEN];
+    FILE *fptr = NULL;
+    int x_shift = max_x/2 - 17; /* 17 to center the logo. Too lazy to adjust */
+    int i = 0;
+
+    if ((fptr = fopen(filename,"r")) == NULL) {
+        fprintf(stderr, "error opening %s\n",filename);
+        return 1;
+    }
+
+    while(fgets(read_string, sizeof(read_string), fptr) != NULL)
+        mvprintw(i++, x_shift, "%s", read_string);
+
+    fclose(fptr);
+
+    return 0;
+}
+
 void snake_start_menu()
 {
     unsigned int highlight = 0;
@@ -397,8 +418,10 @@ void snake_start_menu()
     int enter = 0;
 
     snake_init_screen();
-
     getmaxyx(stdscr, max_y, max_x);
+
+    snake_print_logo(max_x);
+
     WINDOW *menuwin = newwin(5, 20, max_y/2 - 2, max_x/2 - 10);
     box(menuwin, 0, 0);
     refresh();
