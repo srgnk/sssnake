@@ -1,14 +1,13 @@
 # sssnake - Simple Stupid Snake game
-
-Featuring ncurses and multiplayer
+## Featuring
+ncurses, multiplayer, gradually speed increase and window resizing
 
 <p align="center"><img src="/sssnake_demo.gif?raw=true"/></p>
 
-## Installation
+## Compilation
 ```bash
 make
 ```
-
 ## Controls
 Player 1: <kbd>&leftarrow;</kbd> <kbd>&uparrow;</kbd> <kbd>&downarrow;</kbd> <kbd>&rightarrow;</kbd>
 
