@@ -1,8 +1,9 @@
 # sssnake - Simple Stupid Snake game
-## Featuring
-ncurses, multiplayer, gradually speed increase and window resizing
 
 <p align="center"><img src="/sssnake_demo.gif?raw=true"/></p>
+
+## Featuring
+C lang, ncurses, multiplayer, gradually speed increase and window resizing
 
 ## Compilation
 ```bash
